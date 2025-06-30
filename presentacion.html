@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Presentación Boosty Studio</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { height: 100%; width: 100%; overflow: hidden; background: #000; }
+    .slider { position: relative; height: 100vh; width: 100%; }
+    .slide {
+      position: relative;
+      width: 100%;
+      height: 100vh;           /* 100% altura de la ventana */
+      display: none;
+      justify-content: center; /* centra horizontal */
+      align-items: center;     /* centra vertical */
+      background-color: #131313;  /* o el color de fondo que uses */
+      overflow: hidden
+    }
+    .slide.active { display: flex; }
+
+    /* Estilos comunes de contenido */
+    .slide__content {
+      position: relative;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px; 
+      height: 48px;
+      background: #D9800C;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .arrow--prev { left: 20px; }
+    .arrow--next { right: 20px; }
+    .arrow svg { fill: #fff; width: 24px; height: 24px; }
+
+    .dots {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    .dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      margin: 0 5px;
+      background: #ffffff50;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .dot.active { background: #ffffff; }
+
+    /* Slide 1 */
+    .slide[data-index="0"] {
+      background: #131313;
+    }
+    .slide__logo {
+        width: 100%;
+        max-width: 1120px;
+        height: auto;
+        object-fit: contain;
+        margin: 0 auto !important;
+        padding: 0px 80px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: center !important;
+        align-items: center !important;
+        right: 0%;
+        left: 0%;
+    }
+    .slide__info {
+      position: absolute;
+      bottom: 70px;
+      width: 100%;
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+    .slide__info p + p { margin-top: 10px; }
+
+    /* Slide 2 */
+    .slide[data-index="1"] {
+      background: #F68C10; /* naranja */
+    }
+    .slide__content__d2 {
+        width: 100%;
+        max-width: 1120px;
+        height: auto;
+        object-fit: contain;
+        margin: 0 auto !important;
+        padding: 0px 80px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 0%;
+        left: 0%;
+    }
+    .slide--orange .slide__title {
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 74px;
+      line-height: 1.2;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .slide--orange .slide__text {
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 20px;
+      line-height: 1.4;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .slide--orange .slide__title { font-size: 48px; }
+      .slide--orange .slide__text  { font-size: 18px; }
+    }
+
+    /* ——— Slide 3: Mapa del Sitio ——— */
+    .slide--map {
+        background: #131313; /* mantenemos fondo oscuro */
+    }
+
+    /* Contenedor columna con gap */
+    .slide__map-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0px;
+        justify-content: flex-start;
+        height: 100%;
+        overflow-y: auto;
+        padding: 20px 70px 40px;
+    }
+
+    /* Título centrado en la parte superior */
+    .slide--map .slide__title--map {
+        color: #fff;
+        font-family: Montserrat, sans-serif;
+        font-size: 48px;
+        line-height: 1.2;
+        text-align: center;
+        margin: 0 auto;
+    }
+    
+    /* Imagen del sitemap centrada y con un ancho máximo */
+    .slide--map .slide__image--map {
+        width: 100%;
+        max-width: 1400px;
+        height: auto;
+        object-fit: contain;
+    }
+
+    /* Slide 4: Wireframe de Baja Fidelidad */
+    .slide--wire-baja {
+      background: #131313;
+    }
+
+    /* Contenedor de todo el contenido de este slide */
+    .slide__wire-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* separa título de imágenes */
+      gap: 40px;
+      height: 100%;
+      padding: 40px 20px 20px;
+      overflow-y: auto;
+    }
+
+    /* Título */
+    .slide__wire-content .slide__title--wire {
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 48px;
+      line-height: 1.2;
+      text-align: center;
+      margin: 0;
+    }
+
+    /* Contenedor de las dos imágenes */
+    .slide__wire-images {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      width: 100%;
+      height: 814px;
+      padding: 0 20px;
+    }
+
+    /* Cada imagen */
+    .slide__wire-img-desktop {
+      max-width: 940px !important;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .slide__wire-img-mobile {
+      max-width: 370px !important;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    /* Responsive: en móvil, columna */
+    @media (max-width: 1350px) {
+    .slide__wire-images {
+        display: flex;
+        gap: 20px;
+        padding: 0 40px;
+        height: 100%;
+        overflow-y: auto;
+        flex-wrap: wrap;
+    }
+    .slide__wire-img-desktop {
+        max-width: 100%;
+    }
+    .slide__wire-img-mobile {
+        max-width: 100%;
+    }
+    }
+
+    /* ——— Slide 5: Identidad Visual ——— */
+    .slide--idvisual {
+        background: #131313;
+    }
+    .slide__idvisual-content {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 60px;
+        height: 100%;
+        width: 85%;
+        padding: 40px 20px 20px;
+        overflow-y: auto;
+    }
+    .slide__title--idvisual {
+        color: #fff;
+        font-family: Montserrat, sans-serif;
+        font-size: 48px;
+        text-align: center;
+        line-height: 1.2;
+    }
+    .slide__idvisual-typography {
+        color: #fff;
+        font-family: Montserrat, sans-serif;
+        text-align: left;
+        font-size: 20px;
+        line-height: 1.4;
+    }
+    .slide__idvisual-colors {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .slide__idvisual-label {
+        color: #fff;
+        font-family: Montserrat, sans-serif;
+        text-align: center;
+        font-size: 20px;
+        line-height: 1.4;
+    }
+    .slide__idvisual-swatch {
+        width: 160px;
+        height: 160px;
+        border-radius: 8px;
+    }
+    .swatch--orange      { background: #D9800C; }
+    .swatch--white       { background: #FFFFFF; }
+    .swatch--black       { background: #191919; }
+    .swatch--bordered    { background: transparent; border: 2px solid #FFFFFF; }
+    
+    .slide__idvisual-elements {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    .slide__idvisual-elements img {
+        width: auto;
+        height: 180px;
+        object-fit: contain;
+    }
+    
+    /* Responsive ajustes */
+    @media (max-width: 768px) {
+        .slide__title--idvisual { font-size: 36px; }
+        .slide__idvisual-typography,
+        .slide__idvisual-colors, .slide__idvisual-elements { font-size: 16px; gap: 15px; display: flex; flex-direction: column;}
+        .slide__idvisual-swatch { width: 100%; height: 160px; }
+        .slide__idvisual-elements img { width: 100%; height: 180px; }
+    }
+
+    /* Slide 6: Wireframe de diseno final */
+    .slide--disenofinal {
+      background: #F68C10;
+    }
+
+    /* Contenedor de todo el contenido de este slide */
+    .slide__disenofinal-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* separa título de imágenes */
+      gap: 40px;
+      height: 100%;
+      padding: 40px 20px 20px;
+      overflow-y: auto;
+    }
+
+    /* Título */
+    .slide__disenofinal-content .slide__title--disenofinal {
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 48px;
+      line-height: 1.2;
+      text-align: center;
+      margin: 0;
+    }
+
+    /* Contenedor de las dos imágenes */
+    .slide__disenofinal-images {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      width: 100%;
+      height: 814px;
+      padding: 0 20px;
+    }
+
+    /* Cada imagen */
+    .slide__disenofinal-img-desktop {
+      max-width: 940px !important;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .slide__disenofinal-img-mobile {
+      max-width: 370px !important;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    /* Responsive: en móvil, columna */
+    @media (max-width: 1350px) {
+    .slide__disenofinal-images {
+        display: flex;
+        gap: 20px;
+        padding: 0 40px;
+        height: 100%;
+        overflow-y: auto;
+        flex-wrap: wrap;
+    }
+    .slide__disenofinal-img-desktop {
+        max-width: 100%;
+    }
+    .slide__disenofinal-img-mobile {
+        max-width: 100%;
+    }
+    }
+
+    /* Slide 7: Presupuesto */
+    .slide--budget {
+        background: #131313;
+    }
+    
+    .slide__budget-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* todo alineado a la izquierda */
+        width: 100%;
+        padding: 40px 100px;
+        height: 100%;
+        overflow-y: auto;
+        text-align: left;       /* texto alineado a la izquierda */
+    }
+    
+    /* Título centrado */
+    .slide__title--budget {
+        align-self: center;      /* solo el título se centra */
+        font-family: Montserrat, sans-serif;
+        font-size: 64px;
+        color: #fff;
+        margin: 0;
+        padding-bottom: 60px;
+    }
+    
+    /* Subtítulo */
+    .slide__subtitle--budget {
+        font-family: Montserrat, sans-serif;
+        font-size: 38px;
+        color: #fff;
+        margin: 0;
+        padding-bottom: 35px;
+    }
+    
+    /* Lista de partidas */
+    .slide__list--budget {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: Montserrat, sans-serif;
+        font-size: 27px;
+        line-height: 1.2;
+        color: #fff;
+    }
+    
+    /* Total general */
+    .slide__total--budget {
+        font-family: Montserrat, sans-serif;
+        font-size: 32px;
+        color: #fff;
+        margin: 0;
+        padding-bottom: 80px;
+    }
+    .slide__total--budget span {
+        color: #D9800C;
+        margin-left: 4px;
+    }
+    
+    /* Botón */
+    .slide__btn--budget {
+        display: inline-block;
+        padding: 18px 40px;
+        background: #D9800C;
+        color: #fff;
+        font-family: Montserrat, sans-serif;
+        font-size: 26px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .slide__btn--budget:hover {
+        background: #bf700b;
+    }
+
+    ul.slide__list--budget li {
+        margin-bottom: 40px;
+    }
+
+    /* Responsive */
+    @media (max-width: 850px) {
+        .slide__budget-content {
+            padding: 20px 80px;
+        }
+        .slide__title--budget { font-size: 34px; padding-bottom: 35px; }
+        .slide__list--budget
+        {
+            font-size: 18px;
+            text-align: center;
+        }
+        .slide__total--budget {
+            font-size: 20px;
+            text-align: center;
+            padding-bottom: 40px;
+        }
+        .slide__subtitle--budget {
+            font-size: 22px;
+            text-align: center;
+            padding-bottom: 30px;
+        }
+        .slide__btn--budget {
+            font-size: 18px;
+            padding: 16px 18px;
+            width: 100%;
+            text-align: center;
+        }
+        ul.slide__list--budget li {
+            margin-bottom: 25px;
+        }
+        p.slide__total--budget {
+            text-align: center;
+            width: 100%;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="slider">
+    <!-- Slide 1 -->
+    <div class="slide active" data-index="0">
+      <div class="slide__content">
+        <img src="imagenes/banner-boostystudio.png"
+             alt="Boosty Studio"
+             class="slide__logo">
+        <div class="slide__info">
+          <p>Alumno: Thiago Bustos</p>
+          <p>Profesor: Wenceslao Zavala</p>
+          <p>Materia: Contenido y creatividad I</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide slide--orange" data-index="1">
+      <div class="slide__content__d2">
+        <h2 class="slide__title">¿De qué se trata la web?</h2>
+        <p class="slide__text">
+          La web es para Boosty Studio. Boosty es un estudio creativo que ofrece diferentes packs de servicios digitales para potenciar la presencia digital de negocios y marcas personales. Los packs incluyen servicios de branding, creación de contenido, gestión de redes y diseño web.
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 3: Mapa del Sitio -->
+    <div class="slide slide--map" data-index="2">
+        <div class="slide__map-content">
+            <h2 class="slide__title--map">Mapa del Sitio</h2>
+            <img src="imagenes/mapadesitio.png" alt="Mapa del Sitio Boosty" class="slide__image--map">
+        </div>
+    </div>
+
+    <!-- Slide 4: Wireframe de Baja Fidelidad -->
+    <div class="slide slide--wire-baja" data-index="3">
+        <div class="slide__wire-content">
+          <h2 class="slide__title--wire">Wireframe de Baja Fidelidad</h2>
+          <div class="slide__wire-images">
+            <img src="imagenes/wireframebaja-desktop.png" alt="Wireframe Baja Desktop" class="slide__wire-img-desktop">
+            <img src="imagenes/wireframebaja-mobile.png" alt="Wireframe Baja Mobile" class="slide__wire-img-mobile">
+          </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Identidad Visual -->
+    <div class="slide slide--idvisual" data-index="4">
+        <div class="slide__idvisual-content">
+            <h2 class="slide__title--idvisual">Identidad Visual</h2>
+            <div class="slide__idvisual-typography">
+              <strong>Tipografía:</strong>
+              <span>Montserrat: Bold · Semibold · Medium · Regular</span>
+            </div>
+            <div class="slide__idvisual-colors">
+              <strong class="slide__idvisual-label">Colores:</strong>
+              <div class="slide__idvisual-swatch swatch--orange"></div>
+              <div class="slide__idvisual-swatch swatch--white"></div>
+              <div class="slide__idvisual-swatch swatch--black"></div>
+              <div class="slide__idvisual-swatch swatch--bordered"></div>
+            </div>
+            <div class="slide__idvisual-elements">
+                <strong class="slide__idvisual-label">Elementos:</strong>
+                <img src="imagenes/Elemento1.png" alt="Icono elemento 1">
+                <img src="imagenes/Elemento2.png" alt="Icono elemento 2">
+                <img src="imagenes/Elemento3.png" alt="Icono elemento 3">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Wireframe de Alta Fidelidad -->
+    <div class="slide slide--disenofinal" data-index="5">
+        <div class="slide__disenofinal-content">
+          <h2 class="slide__title--disenofinal">Wireframe de Alta Fidelidad</h2>
+          <div class="slide__disenofinal-images">
+            <img src="imagenes/disenofinal-desktop.png" alt="Diseno final Desktop" class="slide__disenofinal-img-desktop">
+            <img src="imagenes/disenofinal-mobile.png" alt="Diseno final Mobile" class="slide__disenofinal-img-mobile">
+          </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Presupuesto -->
+    <div class="slide slide--budget" data-index="6">
+        <div class="slide__budget-content">
+            <h2 class="slide__title--budget">Presupuesto</h2>
+
+            <p class="slide__subtitle--budget">
+                Estimación de horas y seniority: <strong>20 usd/hora</strong>
+            </p>
+            
+            <ul class="slide__list--budget">
+                <li>UX research: 10 horas = 200 usd</li>
+                <li>Arquitectura de la información + userflow: 8 horas = 160 usd</li>
+                <li>UI design: 15 horas = 300 usd</li>
+                <li>Desarrollo front-end: 25 horas = 500 usd</li>
+                <li>Integración & QA: 7 horas = 140 usd</li>
+            </ul>
+
+            <p class="slide__total--budget">
+                <strong>Total general:</strong> 65 horas = <span>1300 usd</span>
+            </p>
+
+            <a href="https://soythiagosuarez.github.io/boostystudio/" target="_blank" rel="noopener" class="slide__btn--budget">
+                Ir a la página web &rarr;
+            </a>
+        </div>
+    </div>  
+
+    <!-- Flechas -->
+    <div class="arrow arrow--prev" id="prevBtn">
+      <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </div>
+    <div class="arrow arrow--next" id="nextBtn">
+      <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+    </div>
+
+    <!-- Paginación -->
+    <div class="dots" id="dots">
+      <span class="dot active" data-index="0"></span>
+      <span class="dot"        data-index="1"></span>
+      <span class="dot"        data-index="2"></span>
+      <span class="dot"        data-index="3"></span>
+      <span class="dot"        data-index="4"></span>
+      <span class="dot"        data-index="5"></span>
+      <span class="dot"        data-index="6"></span>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.slide');
+      const dots   = document.querySelectorAll('.dot');
+      let   idx    = 0;
+
+      function showSlide(i) {
+        slides[idx].classList.remove('active');
+        dots[idx].classList.remove('active');
+        idx = (i + slides.length) % slides.length;
+        slides[idx].classList.add('active');
+        dots[idx].classList.add('active');
+      }
+
+      document.getElementById('prevBtn')
+        .addEventListener('click', () => showSlide(idx - 1));
+      document.getElementById('nextBtn')
+        .addEventListener('click', () => showSlide(idx + 1));
+
+      dots.forEach(dot =>
+        dot.addEventListener('click', e =>
+          showSlide(+e.currentTarget.dataset.index)
+        )
+      );
+    })();
+  </script>
+</body>
+</html>
